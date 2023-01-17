@@ -23,15 +23,14 @@ class TodoModel {
   async getTodos(){
     const res = await client.query('select * from todos')
     console.log(res);
-    return 1;
+    return res.rows;
   }
-  
-  addTodo(todoText) {
-    const todo = {
-      text: todoText,
-      completed: false,
-    };
-    this.todos.push(todo);
+
+  async addTodo(todoText) {
+    const query = 'INSERT INTO todos(id, task) VALUES($1, $2) RETURNING *'
+    const values = [Math.floor(1000 + Math.random() * 9000), todoText]
+    const res = await client.query(query, values)
+    return res;
   }
 
   editTodo(index, todoText) {
@@ -56,8 +55,8 @@ class TodoController {
   async getTodos() {
     return await this.model.getTodos();
   }
-  addTodo(todoText) {
-    this.model.addTodo(todoText);
+  async addTodo(todoText) {
+    await this.model.addTodo(todoText);
   }
 
   editTodo(index, todoText) {
@@ -81,9 +80,9 @@ const todoController = new TodoController(todoModel);
 app.use(bodyParser.json());
 
 app.get("/todos", async (req, res) => {
-  console.log(await todoController.getTodos())
-  res.json({data: 'ok'})
-  return 1;
+  const response = await todoController.getTodos()
+  res.json(response)
+  
   //res.send(todoController.model.todos);
 });
 
