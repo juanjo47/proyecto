@@ -21,14 +21,14 @@ class TodoModel {
   }
 
   async getTodos(){
-    const res = await client.query('select * from todos')
+    const res = await client.query('select * from usuarios')
     console.log(res);
     return res.rows;
   }
 
-  async addTodo(todoText) {
-    const query = 'INSERT INTO todos(id, task) VALUES($1, $2) RETURNING *'
-    const values = [Math.floor(1000 + Math.random() * 9000), todoText]
+  async addTodo(todoName, todoAges) {
+    const query = 'INSERT INTO usuarios(nombre, edad) VALUES($1, $2) RETURNING *'
+    const values = [todoName, todoAges]
     const res = await client.query(query, values)
     return res;
   }
@@ -55,8 +55,11 @@ class TodoController {
   async getTodos() {
     return await this.model.getTodos();
   }
-  async addTodo(todoText) {
-    await this.model.addTodo(todoText);
+  async addTodo(todoName, todoAges) {
+    await this.model.addTodo(todoName, todoAges);
+  }
+  async getStatus(){
+    return {nombre: 'juan jose quiroga Torrez', email: 'lobodlv17@gmail.com'}
   }
 
   editTodo(index, todoText) {
@@ -79,7 +82,7 @@ const todoController = new TodoController(todoModel);
 
 app.use(bodyParser.json());
 
-app.get("/todos", async (req, res) => {
+app.get("/users", async (req, res) => {
   const response = await todoController.getTodos()
   res.json(response)
   
@@ -87,10 +90,11 @@ app.get("/todos", async (req, res) => {
 });
 
 // Vistas (Rutas) (continuación)
-app.post("/todos", (req, res) => {
-  const todoText = req.body.text;
+app.post("/users", (req, res) => {
+  const todoName = req.body.nombre;
+  const todoAges = req.body.edad;
   console.log(req.body)
-  todoController.addTodo(todoText);
+  todoController.addTodo(todoName, todoAges);
   res.sendStatus(200);
 });
 
